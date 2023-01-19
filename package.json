@@ -1,5 +1,5 @@
 {
-  "name": "sport-plus",
+  "name": "exercise-tracker",
   "version": "1.0.0",
   "description": "App to track your sport exercises ans sessions",
   "main": "server.js",
