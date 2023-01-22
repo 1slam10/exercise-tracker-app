@@ -2,9 +2,13 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const exerciseSchema = new Schema({
-    username: { type: String, required: true},
-    description: { type: String, required: true},
-    duration: { type: Number, required: true},
+    user_id: { type: Number, required: true},
+    activity_id: { type: Number, required: true },
+    exercise_id: { type: Number, required: true },
+    duration: { type: Number},
+    intensity: { type: Number},
+    burnt_calories: { type: Number },
+    short_description: { type: String},
     date: { type: Date, required: true},
 }, {
     timestamps: true
