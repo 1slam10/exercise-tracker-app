@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
+const bodyParser = require('body-parser');
 
 require('dotenv').config();
 
@@ -9,8 +11,9 @@ const port = process.env.PORT || 4000;
 
 app.use(cors());
 app.use(express.json());
+app.use(bodyParser.json());
 
-const uri = process.env.ATLAS_URI;
+const uri = process.env.URI;
 mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
 const connection = mongoose.connection;
@@ -21,13 +24,13 @@ connection.once('open', () => {
 
 const exercisesRouter = require('./routes/exercises');
 const usersRouter = require('./routes/users');
+const activitiesRouter = require('./routes/activities');
+const goalsRouter = require('./routes/goals')
 
 app.use('/exercises', exercisesRouter);
 app.use('/users', usersRouter);
-
-if(process.env.NODE_ENV === 'production') {
-    app.use(express.static('frontend/build'));
-}
+app.use('/activities', activitiesRouter);
+app.use('/goals', goalsROuter);
 
 
 app.listen(port, () => {
