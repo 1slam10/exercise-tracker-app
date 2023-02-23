@@ -30,9 +30,12 @@ const goalsRouter = require('./routes/goals')
 app.use('/exercises', exercisesRouter);
 app.use('/users', usersRouter);
 app.use('/activities', activitiesRouter);
-app.use('/goals', goalsROuter);
+app.use('/goals', goalsRouter);
 
 
 app.listen(port, () => {
     console.log(`Server is running on port: ${port}`);
 });
+
+//TODO: write a readme
+//TODO: rewrite frontend

@@ -3,7 +3,7 @@ let User = require('../models/user.model');
 let Statistics = require('../models/statistics.model');
 const bcrypt = require("bcrypt")
 const jwt = require('jsonwebtoken')
-
+//TODO add a route to add favourites
 router.route('/login').post((req, res) => {
     User.findOne({email: req.body.email}, (err, user) => {
         if(err) {
@@ -44,8 +44,6 @@ router.route('/signup').post((req, res) => {
         favourites: favourites
     });
 
-    let isSent = false;
-
     newUser.save()
         .then(() => {
             let Stats = new Statistics({
@@ -71,8 +69,6 @@ router.route('/info').get((req, res) => {
         if (err) return res.status(401).json({
             title: 'Not authoruzed!'
         });
-
-        console.log(decoded);
 
         User.findOne({ _id: decoded.userId }, (err, user) => {
             if (err) {

@@ -1,55 +1,115 @@
 const router = require('express').Router();
-let Exercise = require('../models/exercise.model');
+const Exercise = require('../models/goal.model');
+const jwt = require('jsonwebtoken');
 
 router.route('/').get((req, res) => {
-    Exercise.find()
-        .then(exercises => res.json(exercises))
-        .catch(err => res.status(400).json('Error: ' + err));
-});
+    jwt.verify(req.headers.token, 'secretkey', (err, decoded) => {
+        if (err) return res.status(401).json({
+            title: 'Not authorized!'
+        });
+        Exercise.findAll({ user_id: decoded.userId }, (err, exercises) => {
+            if (err) {
+                return res.status(400).json({
+                    title: 'error occured',
+                    err: err
+                });
+            }
+            if (!exercises) {
+                return res.status(400).json({
+                    title: 'Exercises not found',
+                })
+            }
 
-router.route('/add').post((req, res) => {
-    const username = req.body.username;
-    const description = req.body.description;
-    const duration = Number(req.body.duration);
-    const date = Date.parse(req.body.date);
-
-    const newExercise = new Exercise({
-        username,
-        description,
-        duration,
-        date,
+            return res.status(200).json({
+                title: 'Sucess!',
+                exercises: exercises
+            })
+        });
     });
+})
 
-    newExercise.save()
-        .then(() => res.json('Exercise added!'))
-        .catch(err => res.status(400).json('Error: ' + err));
+router.route('/edit').post((req, res) => {
+    jwt.verify(req.headers.token, 'secretkey', (err, decoded) => {
+        if (err) return res.status(401).json({
+            title: 'Not authorized!'
+        });
+
+        let update = {
+            user_id: decoded.userId,
+            activity_id: req.body.activity_id,
+            exercise_id: req.body.exercise_id,
+            duration: req.body.duration,
+            intensity: req.body.intensity,
+            burnt_calories: req.body.burnt_calories,
+            short_description: req.body.short_description,
+            date: req.body.date
+        }
+
+        Exercise.findOneAndUpdate({ _id: req.body._id }, update, { new: true })
+            .then(updatedExercise => {
+                res.status(200).json({
+                    title: 'Updated successully',
+                    exercise: updatedExercise
+                });
+            })
+            .catch(err => {
+                res.status(400).json({
+                    title: "Unable to update"
+                });
+            });
+    });
 });
 
-router.route('/:id').get((req, res) => {
-    Exercise.findById(req.params.id)
-        .then(exercise => res.json(exercise))
-        .catch(err => res.status(400).json('Error: ' + err));
+router.route('/delete').delete((req, res) => {
+    jwt.verify(req.headers.token, 'secretkey', (err, decoded) => {
+        if (err) return res.status(401).json({
+            title: 'Not authorized!'
+        });
+
+        Goal.deleteOne({_id: req.body._id})
+            .then((smth) => {
+                res.status(200).json({
+                    title: 'Deleted successully',
+                });
+            })
+            .catch(err => {
+                res.status(400).json({
+                    title: "Unable to delete",
+                    err: err
+                });
+            });
+    });
 });
 
-router.route('/:id').delete((req, res) => {
-    Exercise.findByIdAndDelete(req.params.id)
-        .then(() => res.json('Exercise deleted.'))
-        .catch(err => res.status(400).json('Error: ' + err));
-});
+//TODO add burnt calories statistics
+router.route('/create').post((req, res) => {
+    jwt.verify(req.headers.token, 'secretkey', (err, decoded) => {
+        if (err) return res.status(401).json({
+            title: 'Not authorized!'
+        });
 
-router.route('/edit/:id').post((req, res) => {
-    Exercise.findById(req.params.id)
-        .then(exercise => {
-            exercise.username = req.body.username;
-            exercise.description = req.body.description;
-            exercise.duration = Number(req.body.duration);
-            exercise.date = Date.parse(req.body.date);
+        let newExercise = new Exercise({
+            user_id: decoded.userId,
+            activity_id: req.body.activity_id,
+            exercise_id: req.body.exercise_id,
+            duration: req.body.duration,
+            intensity: req.body.intensity,
+            burnt_calories: req.body.burnt_calories,
+            short_description: req.body.short_description,
+            date: req.body.date
+        });
 
-            exercise.save()
-                .then(() => res.json('Exercise updated!'))
-                .catch(err => res.status(400).json('Error: ' + err));
-        })
-        .catch(err => res.status(400).json('Error: ' + err));
+        newExercise.save((err) => {
+            if (err) return console.log(err);
+            return res.status(200).json({
+                title: 'Successfully created',
+                goal: newGoal
+            })
+        }).catch((err) => res.status(400).json({
+            title: 'Error with creating exercise',
+            err: err
+        }));
+    });
 });
 
 module.exports = router;
